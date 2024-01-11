@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Subtitle Editor</title>
+    <style>
+        #videoContainer {
+            position: relative;
+        }
+
+        #subtitleTextBox {
+            position: absolute;
+            top: 70%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Video Subtitle Editor</h1>
+        <input type="file" accept="video/*" id="videoInput" />
+        <br /><br />
+        <div id="videoContainer">
+            <video id="videoPlayer" controls></video>
+            <textarea id="subtitleTextBox" placeholder="Add custom subtitle..."></textarea>
+        </div>
+        <br />
+        <button onclick="addSubtitle()">Add Subtitle</button>
+        <br /><br />
+        <div id="subtitleList">
+            <h3>Existing Subtitles:</h3>
+            <ul id="subtitles"></ul>
+        </div>
+    </div>
+
+    <script>
+        let subtitles = [];
+
+        document.getElementById('videoInput').addEventListener('change', function(event) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.src = URL.createObjectURL(event.target.files[0]);
+        });
+
+        function addSubtitle() {
+            const subtitleTextBox = document.getElementById('subtitleTextBox');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const currentTime = videoPlayer.currentTime;
+
+            const subtitle = {
+                text: subtitleTextBox.value,
+                timestamp: currentTime
+            };
+
+            subtitles.push(subtitle);
+            updateSubtitleList();
+
+            // Clear the subtitle text box
+            subtitleTextBox.value = '';
+        }
+
+        function updateSubtitleList() {
+            const subtitleList = document.getElementById('subtitles');
+            subtitleList.innerHTML = '';
+
+            subtitles.forEach(subtitle => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Timestamp: ${subtitle.timestamp.toFixed(2)} - ${subtitle.text}`;
+                subtitleList.appendChild(listItem);
+            });
+        }
+
+        videoPlayer.addEventListener('timeupdate', function() {
+            const currentTime = videoPlayer.currentTime;
+            const currentSubtitle = subtitles.find(subtitle => currentTime >= subtitle.timestamp && currentTime < subtitle.timestamp + 5);
+
+            if (currentSubtitle) {
+                alert(`Current Subtitle: ${currentSubtitle.text}`);
+            }
+        });
+    </script>
+</body>
+</html>
